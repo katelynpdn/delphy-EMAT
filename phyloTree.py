@@ -15,7 +15,7 @@ class Node:
       return not self.children
 
 class Tree:
-   def __init__(self, nodes):
+   def __init__(self, nodes=[]):
       self.root = K_NO_NODE   # Parent index (int)
       self.nodes = nodes      # List of Nodes
    def __init__(self, numNodes):
@@ -26,8 +26,6 @@ class Tree:
    def insertNode(self, node) -> int:
       newNodeIndex = len(self.nodes)
       self.nodes.append(node)
-      if (newNodeIndex) == 0:
-         self.root = newNodeIndex
       return newNodeIndex
    def at(self, i) -> Node:
       return self.nodes[i]
@@ -39,7 +37,7 @@ class Tree:
 class Mutation:
    def __init__(self, fromSeqLetter='', site=-1, toSeqLetter='', t=0.0):
       self.fromSeqLetter = fromSeqLetter
-      self.site = site
+      self.site = site     #Site index (int)
       self.toSeqLetter = toSeqLetter
       self.t = t
 
@@ -61,6 +59,10 @@ class PhyloNode(Node):
       self.t = t
       self.mutations = []
       self.missations = []
+   def addMutation(self, mutation):
+      self.mutations.append(mutation)
+   def addMissation(self, missation):
+      self.missations.append(missation)
 
 class PhyloTreeLoc:
    def __init__(self, branch=K_NO_NODE, t=0.0):
@@ -71,20 +73,28 @@ class PhyloTree(Tree):
    def __init__(self, refSequence=[]):
       self.refSequence = refSequence    # List of chars (A,C,G, or T)
       super().__init__(0)
+   def __init__(self, refSequenceString=""):
+      self.refSequence = []
+      for i in refSequenceString:
+         self.refSequence.append(i)
+      super().__init__(0)
    def printTree(self):
       print(f"Tree: refSequence={self.refSequence}, root={self.root}, nodes={self.nodes}")
+   def getEdgeLength(self, nodeIndex): #Get (time - parent time) at specified node, from days to years
+      node = self.at(nodeIndex)
+      return (node.t - self.at(node.parent).t)/365
    
    # Traversal helper function
    def _traversal(self, curNode, curSwiftNode):
       for child in curNode.children:
          childNode = self.at(child)
-         newSwiftNode = swiftNode(childNode.name)
+         newSwiftNode = swiftNode(childNode.name, self.getEdgeLength(child))
          curSwiftNode.add_child(newSwiftNode)
          curSwiftNode = newSwiftNode
          self._traversal(childNode, curSwiftNode)
    def convertTreeSwift(self) -> swiftTree:
       tree = swiftTree()
-      tree.root = swiftNode(self.at(self.root).name)
+      tree.root = swiftNode(self.at(self.root).name, self.getEdgeLength(self.root))
       if (self.size() != 0):
          self._traversal(self.at(self.root), tree.root)
       return tree
@@ -92,7 +102,18 @@ class PhyloTree(Tree):
       tree = self.convertTreeSwift()
       # for node in tree.traverse_preorder():
       #    print(node)
-      return tree.newick()
+      return tree.indent()
+   def outputNewickFile(self, filename):
+      tree = self.convertTreeSwift()
+      # for node in tree.traverse_preorder():
+      #    print(node)
+      return tree.write_tree_newick(filename)
+   def outputNexusTree(self):
+      tree = self.convertTreeSwift()
+      return tree.nexus()
+   def drawTree(self):
+      tree = self.convertTreeSwift()
+      return tree.draw()
 
    # Print in newick format using post-order traversal
    # def output_newick_tree(self):

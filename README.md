@@ -5,18 +5,19 @@ This project provides a simplified Python implementation of the **EMAT tree form
 Note: Several functions directly adapted from files in delphy/core: tree.h, phylo_tree.h, and mutations.h
 
 ---
+
 ```bash
 ├── src
 │   ├── alternativePhyloTree
 │   │   └── newickemat.py
-│   └── phyloTree.py          # Core script for EMAT trees and conversions
+│   ├── phyloTree.py            # Core script for EMAT trees and conversions
+│   └── phyloTreeTest.py        # Test phyloTree.py
 └── tests
-    ├── exampleTest
-    │   ├── ematTest.fasta    # Sample FASTA file for testing
-    │   └── ematTest.txt      # Actual delphy EMAT representation of ematTest.fasta (from running gdb on Delphy)
-    └── phyloTreeTest.py      # Test for EMAT to Newick, and Newick to EMAT conversion
-```
+    └── exampleTest
+        ├── ematTest.fasta      # Sample FASTA file, referenced in phyloTreeTest.py
+        └── ematTest.txt        # Delphy EMAT representation of ematTest.fasta (from running gdb on Delphy)
 
+```
 
 # Dependencies
 
